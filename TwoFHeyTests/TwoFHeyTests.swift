@@ -214,3 +214,51 @@ class TwoFHeyTests: XCTestCase {
 //        }
 //    }
 }
+
+
+// Define a new subclass of XCTestCase for grouped tests
+class OTPParserTests: XCTestCase {
+
+    // Test Parsing Logic for Known Services
+    func testParsingKnownService() throws {
+        let parser = TwoFHeyOTPParser(withConfig: ParserConfigManager.DEFAULT_CONFIG)
+        // Test parsing for a known service with a specific message format
+        XCTAssertEqual(parser.parseMessage(#"Your Google verification code is 123456"#), ParsedOTP(service: "google", code: "123456"))
+    }
+
+    // Test Handling of Custom Patterns
+    func testCustomPatternExtraction() throws {
+        // Assuming a custom pattern is already defined in the setup
+        let message = "custom-service: Your code is 7890"
+        let parser = TwoFHeyOTPParser(withConfig: yourCustomConfig) // yourCustomConfig includes the custom pattern
+        XCTAssertEqual(parser.parseMessage(message), ParsedOTP(service: "custom-service", code: "7890"))
+    }
+
+    // Test Service Name Identification
+    func testServiceNameIdentification() throws {
+        let parser = TwoFHeyOTPParser(withConfig: ParserConfigManager.DEFAULT_CONFIG)
+        // Test service name identification
+        XCTAssertEqual(parser.parseMessage(#"Use 4567 as your verification code for MyApp."#), ParsedOTP(service: "MyApp", code: "4567"))
+    }
+
+    // Test Error Handling
+    func testParsingFailure() throws {
+        let parser = TwoFHeyOTPParser(withConfig: ParserConfigManager.DEFAULT_CONFIG)
+        // Test with a message that does not conform to any known pattern
+        XCTAssertNil(parser.parseMessage("This is a regular message without an OTP code."))
+    }
+
+    // Test Updating Configuration
+    func testConfigurationUpdate() throws {
+        var parser = TwoFHeyOTPParser(withConfig: ParserConfigManager.DEFAULT_CONFIG)
+        // Assume DEFAULT_CONFIG does not include "new-service"
+        XCTAssertNil(parser.parseMessage("Your new-service code is 1234."))
+        
+        // Update the parser configuration to include "new-service"
+        let updatedConfig = // Create a configuration that includes "new-service"
+        parser = TwoFHeyOTPParser(withConfig: updatedConfig)
+        
+        // Test parsing with the updated configuration
+        XCTAssertNotNil(parser.parseMessage("Your new-service code is 1234."))
+    }
+}
