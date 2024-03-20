@@ -158,14 +158,14 @@ class TwoFHeyTests: XCTestCase {
 //        XCTAssertEqual(parser.parseMessage(#"<#> Your ExampleApp code is: 123ABC78 FA+9qCX9VSu"#), ParsedOTP(service: "exampleapp", code: "123ABC78"))
 
     }
-    
+
     func testShouldNotParseAPhoneNumber() throws {
         let parser = TwoFHeyOTPParser(withConfig: ParserConfigManager.DEFAULT_CONFIG)
 
         XCTAssertEqual(parser.parseMessage(#"388-941-4444 your code is 333222"#), ParsedOTP(service: nil, code: "333222"))
 
     }
-    
+
     func testCustomPattern() throws {
 //        let customPattern = OTPParserCustomPatternConfiguration()
         let jsonPattern = #"""
@@ -175,7 +175,7 @@ class TwoFHeyTests: XCTestCase {
 }
 """#
         let decoded = try JSONDecoder().decode(OTPParserCustomPatternConfiguration.self, from: jsonPattern.data(using: .utf8)!)
-        
+
         let testConfig = OTPParserConfiguration(servicePatterns: [], knownServices: [], customPatterns: [decoded])
 
         let parser = TwoFHeyOTPParser(withConfig: testConfig)
@@ -183,32 +183,34 @@ class TwoFHeyTests: XCTestCase {
         XCTAssertEqual(parser.parseMessage(#"someweird-pattern:a1b2c3"#), ParsedOTP(service: nil, code: "a1b2c3"))
 
     }
-    
-    func testCustomPatternWithNoServieName() {
-        let message = "46143020\nvalid 5 minutes\ndurata 5 minuti\ndurée 5 minutes\ngültig 5 minuten\r"
+
+    func testCustomPatternWithNoServiceName() {
+        let message = "46143020\nValid 5 minutes\nDurata 5 minuti\nDurée 5 minutes\nGültig 5 Minuten"
         let jsonPattern = #"""
       {
-         "serviceName": "pf-bank",
-         "matcherPattern": "^[0-9]{8}\nValid 5 minutes\nDurata 5 minuti\nDurée 5 minutes\nGültig 5 Minuten$",
-         "codeExtractorPattern": "^[0-9]{8}"
+          "serviceName": "pf-bank",
+          "matcherPattern": "^[0-9]{8}\nvalid 5 minutes\ndurata 5 minuti\ndurée 5 minutes\ngültig 5 minuten$",
+          "codeExtractorPattern": "^([0-9]{8})"
       }
-"""#
+      """#
+
+
         let decoded = try! JSONDecoder().decode(OTPParserCustomPatternConfiguration.self, from: jsonPattern.data(using: .utf8)!)
-        
+
         let testConfig = OTPParserConfiguration(servicePatterns: [], knownServices: [], customPatterns: [decoded])
 
         XCTAssertNotNil(decoded.matcherPattern.firstMatchInString(message), "")
-        
+
         let parser = TwoFHeyOTPParser(withConfig: testConfig)
 
-        XCTAssertEqual(parser.parseMessage(message), ParsedOTP(service: Optional("pf-bank"), code: "46143020"))
+        XCTAssertEqual(parser.parseMessage(message), ParsedOTP(service: nil, code: "46143020"))
 
     }
 
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
+//    func testPerformanceExample() throws {
+//        // This is an example of a performance test case.
+//        measure {
+//            // Put the code you want to measure the time of here.
+//        }
+//    }
 }

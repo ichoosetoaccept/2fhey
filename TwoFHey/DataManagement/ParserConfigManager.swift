@@ -19,13 +19,13 @@ public class ParserConfigManager: ObservableObject {
     }
 
     private func loadLocalServiceConfig() -> OTPParserConfiguration? {
-        print("Loading local service config")
-        guard let path = configurationFilePath, let data = try? Data(contentsOf: path) else {
-            print("Failed to load local service config")
-            return nil
-        }
-        print("Loaded local service config data")
-        return try? JSONDecoder().decode(OTPParserConfiguration.self, from: data)
+      print("Loading local service config")
+      guard let path = configurationFilePath, let data = try? Data(contentsOf: path) else {
+        print("Failed to load local service config")
+        return nil
+      }
+      print("Loaded local service config data: \(String(data: data, encoding: .utf8) ?? "")")
+      return try? JSONDecoder().decode(OTPParserConfiguration.self, from: data)
     }
 
     private var configURL = URL(string: "https://raw.githubusercontent.com/SoFriendly/2fhey/main/AppConfig.json")
